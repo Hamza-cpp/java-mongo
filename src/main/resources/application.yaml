@@ -1,2 +1,3 @@
 mongodb:
-  uri: "mongodb://localhost:27017/DBLP"
+  uri: "mongodb://localhost:27017/javaDB"
+  name: "javaDB"
