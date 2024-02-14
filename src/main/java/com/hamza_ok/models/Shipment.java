@@ -15,6 +15,6 @@ public class Shipment {
     private Date shipDate;
     private String carrier;
     private String trackingNumber;
-    private Data estimatedDeliveryDate;
+    private Date estimatedDeliveryDate;
     private Address address;
 }
