@@ -8,10 +8,9 @@ import org.slf4j.LoggerFactory;
 import com.hamza_ok.DAO.UserDao;
 import com.hamza_ok.services.UserService;
 import com.hamza_ok.DAO.UserDaoImpl;
+import com.hamza_ok.config.MongoConfig;
 import com.hamza_ok.config.YamlConfig;
 import com.hamza_ok.models.User;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 
 public class App {
@@ -23,18 +22,20 @@ public class App {
         final String DB_NAME = appConfig.getString("mongodb.name");
         final String DB_URI = appConfig.getString("mongodb.uri");
 
-        try (MongoClient mongoClient = MongoClients.create(DB_URI)) {
-            MongoDatabase database = mongoClient.getDatabase(DB_NAME);
+        try (MongoConfig mongoConfig = new MongoConfig(DB_URI)) {
+
+            MongoDatabase database = mongoConfig.getMongoClient().getDatabase(DB_NAME);
 
             UserDao userDao = new UserDaoImpl(database);
             UserService userService = new UserService(userDao);
-            User user = new User();
-            User user1 = new User();
-
-            user.setName("Cheb hassni");
-            user.setEmail("hassni@gmail.com");
-            user1.setName("Cheb Bilal");
-            user1.setEmail("Bilal@gmail.com");
+            User user = User.builder()
+                    .name("Cheb hassni")
+                    .email("hassni@gmail.com")
+                    .build();
+            User user1 = User.builder()
+                    .name("Cheb Bilal")
+                    .email("Bilal@gmail.com")
+                    .build();
 
             try {
                 User createdUser = userService.save(user);
@@ -51,7 +52,7 @@ public class App {
 
             try {
                 User user2 = userService.find(user.getId());
-                logger.info("Catch u: {}",user2.toString());
+                logger.info("Catch u: {}", user2.toString());
             } catch (Exception e) {
                 logger.error("Fail to find User:", e);
             }
@@ -70,9 +71,10 @@ public class App {
                 logger.error("Fail to find Users:", e);
             }
 
-            User newUser = new User();
-            newUser.setName("John Dao");
-            newUser.setEmail("John@example.com");
+            User newUser = User.builder()
+                    .name("John Dao")
+                    .email("John@example.com")
+                    .build();
 
             try {
                 User updatedUser = userService.update(user.getId(), newUser);
@@ -86,6 +88,10 @@ public class App {
             } catch (Exception e) {
                 logger.error("Fail to delete User:", e);
             }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        } finally {
+            logger.info("Application finished.");
         }
     }
 }
