@@ -67,10 +67,11 @@ public class UserDaoImpl implements UserDao {
             ObjectId _ObjectId = new ObjectId(id);
             Document userDoc = usersCollection.find(eq("_id", _ObjectId)).first();
             if (userDoc != null) {
-                user = new User();
-                user.setId(id);
-                user.setName(userDoc.getString("name"));
-                user.setEmail(userDoc.getString("email"));
+                user = User.builder()
+                        .id(id)
+                        .name(userDoc.getString("name"))
+                        .email(userDoc.getString("email"))
+                        .build();
                 logger.info("User found with ID: {} Name: {} Email: {}", user.getId(), user.getName(), user.getEmail());
             } else {
                 logger.info("User not found with ID: {}", id);
@@ -94,10 +95,11 @@ public class UserDaoImpl implements UserDao {
         try (allUsers) {
             while (allUsers.hasNext()) {
                 Document userDoc = allUsers.next();
-                User user = new User();
-                user.setId(userDoc.getObjectId("_id").toHexString());
-                user.setName(userDoc.getString("name"));
-                user.setEmail(userDoc.getString("email"));
+                User user = User.builder()
+                        .id(userDoc.getObjectId("_id").toHexString())
+                        .name(userDoc.getString("name"))
+                        .email(userDoc.getString("email"))
+                        .build();
                 users.add(user);
             }
         } catch (ClassCastException e) {
@@ -124,10 +126,11 @@ public class UserDaoImpl implements UserDao {
         try {
             Document userDocument = usersCollection.find(eq("_id", new ObjectId(id))).first();
             if (userDocument != null) {
-                user = new User();
-                user.setId(id);
-                user.setName(newUser.getName());
-                user.setEmail(newUser.getEmail());
+                user = User.builder()
+                        .id(id)
+                        .name(newUser.getName())
+                        .email(newUser.getEmail())
+                        .build();
 
                 Bson query = eq("_id", new ObjectId(id));
 
