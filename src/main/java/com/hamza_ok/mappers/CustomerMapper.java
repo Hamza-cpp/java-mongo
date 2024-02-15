@@ -15,17 +15,23 @@ public class CustomerMapper implements DocumentMapper<Customer> {
 
     private final static Logger logger = LoggerFactory.getLogger(CustomerMapper.class);
 
+    /**
+     * Converts a Customer entity to a MongoDB document.
+     *
+     * @param customer the Customer entity to convert
+     * @return the MongoDB document representing the Customer entity
+     */
     @Override
     public Document toDocument(Customer entaty) {
 
         Document document = new Document();
-        if (entaty.getId() != null && !entaty.getId().isEmpty()) {
-            try {
-                document.append("_id", new ObjectId(entaty.getId()));
-            } catch (IllegalArgumentException e) {
-                logger.error("Invalid customer ID format: {}", e);
-            }
+
+        try {
+            document.append("_id", new ObjectId(entaty.getId()));
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid customer ID format: {}", e);
         }
+
         document.append("firstName", entaty.getFirstName())
                 .append("lastName", entaty.getLastName())
                 .append("email", entaty.getEmail())
@@ -40,6 +46,12 @@ public class CustomerMapper implements DocumentMapper<Customer> {
         return document.append("addresses", addressDocuments);
     }
 
+    /**
+     * Converts a MongoDB document to a Customer entity.
+     *
+     * @param document the MongoDB document to convert
+     * @return the Customer entity represented by the MongoDB document
+     */
     @Override
     public Customer fromDocument(Document document) {
         Customer.CustomerBuilder customerBuilder = Customer.builder();

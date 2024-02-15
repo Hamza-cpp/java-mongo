@@ -1,6 +1,5 @@
 package com.hamza_ok.mappers;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.bson.Document;
@@ -14,17 +13,22 @@ public class ProductMapper implements DocumentMapper<Product> {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    /**
+     * Maps a Product object to a MongoDB document.
+     *
+     * @param entaty the Product object
+     * @return the MongoDB document
+     */
     @Override
     public Document toDocument(Product entaty) {
 
         Document document = new Document();
-        if (entaty.getId() != null && !entaty.getId().isEmpty()) {
-            try {
-                document.append("_id", new ObjectId(entaty.getId()));
 
-            } catch (Exception e) {
-                logger.error("Invalid product ID format: {}. Exception is: {}", entaty.getId(), e);
-            }
+        try {
+            document.append("_id", new ObjectId(entaty.getId()));
+
+        } catch (Exception e) {
+            logger.error("Invalid product ID format: {}. Exception is: {}", entaty.getId(), e);
         }
 
         return document
@@ -35,6 +39,12 @@ public class ProductMapper implements DocumentMapper<Product> {
                 .append("category", entaty.getCategories());
     }
 
+    /**
+     * Maps a MongoDB document to a Product object.
+     *
+     * @param document the MongoDB document
+     * @return the Product object
+     */
     @Override
     public Product fromDocument(Document document) {
         Product.ProductBuilder productBuilder = Product.builder();
@@ -48,7 +58,7 @@ public class ProductMapper implements DocumentMapper<Product> {
                     .price(document.getDouble("price"))
                     .stock(document.getInteger("stock", 0));
 
-            List<String> categoryList = document.getList("categories", String.class, Arrays.asList("default Category"));
+            List<String> categoryList = document.getList("categories", String.class);
             productBuilder.categories(categoryList);
         } catch (ClassCastException e) {
             logger.error("Error casting product fields from document. {}", e);

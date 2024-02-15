@@ -11,24 +11,35 @@ public class OrderItemMapper implements DocumentMapper<OrderItem> {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    /**
+     * Converts an OrderItem entity to a MongoDB document.
+     *
+     * @param entaty the OrderItem entity to convert
+     * @return the MongoDB document
+     */
     @Override
     public Document toDocument(OrderItem entaty) {
         Document document = new Document();
-        if (entaty.getProductId() != null && !entaty.getProductId().isEmpty()) {
-            try {
+        try {
 
-                ObjectId productId = new ObjectId(entaty.getProductId());
-                document.append("productId", productId);
-            } catch (IllegalArgumentException e) {
-                logger.error("Invalid productId format: {}", e);
-            }
+            ObjectId productId = new ObjectId(entaty.getProductId());
+            document.append("productId", productId);
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid productId format: {}", e);
         }
+
         return document
                 .append("quantity", entaty.getQuantity())
                 .append("price", entaty.getPrice());
 
     }
 
+    /**
+     * Converts a MongoDB document to an OrderItem entity.
+     *
+     * @param document the MongoDB document to convert
+     * @return the OrderItem entity
+     */
     @Override
     public OrderItem fromDocument(Document document) {
         OrderItem.OrderItemBuilder orderItemBuilder = OrderItem.builder();

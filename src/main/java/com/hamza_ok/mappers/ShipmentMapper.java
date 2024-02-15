@@ -12,21 +12,24 @@ public class ShipmentMapper implements DocumentMapper<Shipment> {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    /**
+     * Converts a Shipment object to a MongoDB Document.
+     *
+     * @param shipment the Shipment object to convert
+     * @return the MongoDB Document representation of the Shipment object
+     */
     @Override
     public Document toDocument(Shipment shipment) {
         Document document = new Document();
 
-        if (shipment.getId() != null && !shipment.getId().isEmpty()) {
-            try {
-                ObjectId objectId = new ObjectId(shipment.getId());
-                document.append("_id", objectId);
-            } catch (IllegalArgumentException e) {
-                logger.error("Invalid Shipment ID format: {}", shipment.getId());
-            }
+        try {
+            document.append("_id", new ObjectId(shipment.getId()));
+            document.append("orderId", new ObjectId(shipment.getOrderId()));
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid Shipment ID format: {}", shipment.getId());
         }
 
-        document.append("orderId", shipment.getOrderId())
-                .append("status", shipment.getStatus())
+        document.append("status", shipment.getStatus())
                 .append("shipDate", shipment.getShipDate())
                 .append("carrier", shipment.getCarrier())
                 .append("trackingNumber", shipment.getTrackingNumber())
@@ -40,13 +43,19 @@ public class ShipmentMapper implements DocumentMapper<Shipment> {
         return document;
     }
 
+    /**
+     * Converts a MongoDB Document to a Shipment object.
+     *
+     * @param document the MongoDB Document to convert
+     * @return the Shipment object representation of the MongoDB Document
+     */
     @Override
     public Shipment fromDocument(Document document) {
         Shipment.ShipmentBuilder builder = Shipment.builder();
         try {
             builder
-                    .id(document.getObjectId("_id").toString())
-                    .orderId(document.getString("orderId"))
+                    .id(document.getObjectId("_id").toHexString())
+                    .orderId(document.getObjectId("orderId").toHexString())
                     .status(document.getString("status"))
                     .shipDate(document.getDate("shipDate"))
                     .carrier(document.getString("carrier"))
