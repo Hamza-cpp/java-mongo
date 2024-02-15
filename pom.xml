@@ -11,10 +11,23 @@
 
   <properties>
 
-    <java.version>21</java.version>
+    <!-- <java.version>21</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>21</maven.compiler.source>
-    <maven.compiler.target>21</maven.compiler.target>
+    <maven.compiler.target>21</maven.compiler.target> -->
+
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven-compiler-plugin.source>17</maven-compiler-plugin.source>
+    <maven-compiler-plugin.target>17</maven-compiler-plugin.target>
+    <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+    <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+    <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
+    <mongodb-driver-sync.version>4.11.1</mongodb-driver-sync.version>
+    <logback-classic.version>1.4.4</logback-classic.version>
+    <snakeyaml.version>2.0</snakeyaml.version>
+    <slf4j-api.version>2.0.1</slf4j-api.version>
+    <lombok.version>1.18.30</lombok.version>
+    <junit.version>3.8.1</junit.version>
 
   </properties>
 
@@ -25,63 +38,40 @@
     <dependency>
       <groupId>org.mongodb</groupId>
       <artifactId>mongodb-driver-sync</artifactId>
-      <version>4.11.1</version>
+      <version>${mongodb-driver-sync.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
-      <version>2.0</version>
+      <version>${snakeyaml.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>2.0.1</version> <!-- check for the latest version -->
+      <version>${slf4j-api.version}</version>
     </dependency>
 
-    <!-- Logback Classic Module -->
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.4.4</version>
+      <version>${logback-classic.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.30</version>
+      <version>${lombok.version}</version>
       <scope>provided</scope>
     </dependency>
-
-    <!-- <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-api</artifactId>
-      <version>2.19.0</version>
-    </dependency> -->
-
-    <!-- Log4J Core -->
-    <!-- <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-core</artifactId>
-      <version>2.19.0</version>
-    </dependency> -->
-
-    <!-- Log4J-SLF4J Binding -->
-    <!-- <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-slf4j2-impl</artifactId>
-      <version>2.22.1</version>
-    </dependency> -->
-
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
-
 
   </dependencies>
 
@@ -90,13 +80,23 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <source>${maven-compiler-plugin.source}</source>
+          <target>${maven-compiler-plugin.target}</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.3.0</version>
+        <version>${maven-jar-plugin.version}</version>
         <configuration>
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>com.hamza_ok.App</mainClass>
+              <mainClass>${project.groupId}.App</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -105,7 +105,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.4</version>
+        <version>${maven-shade-plugin.version}</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -119,14 +119,13 @@
               <transformers>
                 <transformer
                   implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>com.hamza_ok.App</mainClass>
+                  <mainClass>${project.groupId}.App</mainClass>
                 </transformer>
               </transformers>
             </configuration>
           </execution>
         </executions>
       </plugin>
-
     </plugins>
   </build>
 
