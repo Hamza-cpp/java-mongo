@@ -9,6 +9,7 @@ import com.hamza_ok.models.Order;
 import com.hamza_ok.models.OrderItem;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class OrderMapper implements DocumentMapper<Order> {
@@ -24,12 +25,51 @@ public class OrderMapper implements DocumentMapper<Order> {
     public Document toDocument(Order order) {
         Document document = new Document();
 
+        // Handling Order ID
+        appendObjectId(document, "_id", order.getId(), order::setId, "Order");
+
+        // Handling Customer ID
+        appendObjectId(document, "customerId", order.getCustomerId(), order::setCustomerId, "Customer");
+
+        // Handling Shipment ID
+        appendObjectId(document, "shipmentId", order.getShipmentId(), order::setShipmentId, "Shipment");
+
         try {
             document.append("_id", new ObjectId(order.getId()));
+        } catch (IllegalArgumentException e) {
+
+            ObjectId _ObjectId = new ObjectId();
+            String oldId = order.getId();
+            order.setId(_ObjectId.toHexString());
+            document.append("_id", _ObjectId);
+
+            logger.error("Invalid Order ID format: {}, generating a new random ID : {}",
+                    oldId, order.getId(), e);
+        }
+        try {
             document.append("customerId", new ObjectId(order.getCustomerId()));
+        } catch (IllegalArgumentException e) {
+
+            ObjectId _ObjectId = new ObjectId();
+            String oldId = order.getCustomerId();
+            order.setCustomerId(_ObjectId.toHexString());
+            document.append("_id", _ObjectId);
+
+            logger.error("Invalid Customer ID format: {}, generating a new random ID : {}",
+                    oldId, order.getCustomerId(), e);
+        }
+        try {
+
             document.append("shipmentId", new ObjectId(order.getShipmentId()));
-        } catch (Exception e) {
-            logger.error("Invalid Order ID format: {}. Exception is: {}", order.getId(), e);
+        } catch (IllegalArgumentException e) {
+
+            ObjectId _ObjectId = new ObjectId();
+            String oldId = order.getShipmentId();
+            order.setShipmentId(_ObjectId.toHexString());
+            document.append("_id", _ObjectId);
+
+            logger.error("Invalid Shippment ID format: {}, generating a new random ID : {}",
+                    oldId, order.getShipmentId(), e);
         }
 
         document.append("orderNumber", order.getOrderNumber())
@@ -75,5 +115,30 @@ public class OrderMapper implements DocumentMapper<Order> {
         }
 
         return builder.build();
+    }
+
+    /**
+     * Helper method to append ObjectId fields to a document, handling invalid ID
+     * formats by generating a new ID.
+     * 
+     * @param document      The MongoDB document to append to.
+     * @param fieldName     The field name for the document.
+     * @param fieldValue    The current field value supposed to be an ID.
+     * @param idSetter      A Consumer to set a new ID back into the object in case
+     *                      of format issues.
+     * @param idDescription A description for logging purpose
+     *                      (e.g.,"Order","Customer").
+     */
+    private void appendObjectId(Document document, String fieldName, String fieldValue, Consumer<String> idSetter,
+            String idDescription) {
+        try {
+            document.append(fieldName, new ObjectId(fieldValue));
+        } catch (IllegalArgumentException e) {
+            ObjectId newObjectId = new ObjectId();
+            idSetter.accept(newObjectId.toHexString());
+            document.append(fieldName, newObjectId);
+            logger.error("Invalid {} ID format: {}, generating a new random ID : {}", idDescription, fieldValue,
+                    newObjectId.toHexString(), e);
+        }
     }
 }

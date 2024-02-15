@@ -1,5 +1,7 @@
 package com.hamza_ok.mappers;
 
+import java.util.function.Consumer;
+
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
@@ -22,12 +24,8 @@ public class ShipmentMapper implements DocumentMapper<Shipment> {
     public Document toDocument(Shipment shipment) {
         Document document = new Document();
 
-        try {
-            document.append("_id", new ObjectId(shipment.getId()));
-            document.append("orderId", new ObjectId(shipment.getOrderId()));
-        } catch (IllegalArgumentException e) {
-            logger.error("Invalid Shipment ID format: {}", shipment.getId());
-        }
+        appendObjectId(document, "_id", shipment.getId(), shipment::setId, "Shippment");
+        appendObjectId(document, "orderId", shipment.getOrderId(), shipment::setOrderId, "Order");
 
         document.append("status", shipment.getStatus())
                 .append("shipDate", shipment.getShipDate())
@@ -72,5 +70,30 @@ public class ShipmentMapper implements DocumentMapper<Shipment> {
         }
 
         return builder.build();
+    }
+
+    /**
+     * Helper method to append ObjectId fields to a document, handling invalid ID
+     * formats by generating a new ID.
+     * 
+     * @param document      The MongoDB document to append to.
+     * @param fieldName     The field name for the document.
+     * @param fieldValue    The current field value supposed to be an ID.
+     * @param idSetter      A Consumer to set a new ID back into the object in case
+     *                      of format issues.
+     * @param idDescription A description for logging purpose
+     *                      (e.g.,"Order","Customer").
+     */
+    private void appendObjectId(Document document, String fieldName, String fieldValue, Consumer<String> idSetter,
+            String idDescription) {
+        try {
+            document.append(fieldName, new ObjectId(fieldValue));
+        } catch (IllegalArgumentException e) {
+            ObjectId newObjectId = new ObjectId();
+            idSetter.accept(newObjectId.toHexString());
+            document.append(fieldName, newObjectId);
+            logger.error("Invalid {} ID format: {}, generating a new random ID : {}", idDescription, fieldValue,
+                    newObjectId.toHexString(), e);
+        }
     }
 }

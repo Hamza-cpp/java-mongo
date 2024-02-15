@@ -29,7 +29,14 @@ public class CustomerMapper implements DocumentMapper<Customer> {
         try {
             document.append("_id", new ObjectId(entaty.getId()));
         } catch (IllegalArgumentException e) {
-            logger.error("Invalid customer ID format: {}", e);
+
+            ObjectId _ObjectId = new ObjectId();
+            String oldId = entaty.getId();
+            entaty.setId(_ObjectId.toHexString());
+            document.append("_id", _ObjectId);
+
+            logger.error("Invalid customer ID format: {}, generating a new random ID : {}",
+                    oldId, entaty.getId(), e);
         }
 
         document.append("firstName", entaty.getFirstName())
@@ -70,13 +77,15 @@ public class CustomerMapper implements DocumentMapper<Customer> {
                 addresses = addressDocs.stream().map(doc -> new AddressMapper().fromDocument(doc))
                         .collect(Collectors.toList());
             }
-        } catch (ClassCastException e) {
+            return customerBuilder
+                    .addresses(addresses)
+                    .build();
+
+        } catch (ClassCastException | NullPointerException e) {
             logger.error("Error casting.", e);
         }
 
-        return Customer.builder()
-                .addresses(addresses)
-                .build();
+        return customerBuilder.build();
     }
 
 }

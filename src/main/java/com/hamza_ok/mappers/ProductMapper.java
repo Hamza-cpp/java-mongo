@@ -28,7 +28,13 @@ public class ProductMapper implements DocumentMapper<Product> {
             document.append("_id", new ObjectId(entaty.getId()));
 
         } catch (Exception e) {
-            logger.error("Invalid product ID format: {}. Exception is: {}", entaty.getId(), e);
+            ObjectId _ObjectId = new ObjectId();
+            String oldId = entaty.getId();
+            entaty.setId(_ObjectId.toHexString());
+            document.append("_id", _ObjectId);
+
+            logger.error("Invalid Product ID format: {}, generating a new random ID : {}",
+                    oldId, entaty.getId(), e);
         }
 
         return document

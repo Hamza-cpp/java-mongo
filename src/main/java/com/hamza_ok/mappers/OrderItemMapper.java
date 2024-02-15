@@ -21,11 +21,16 @@ public class OrderItemMapper implements DocumentMapper<OrderItem> {
     public Document toDocument(OrderItem entaty) {
         Document document = new Document();
         try {
-
-            ObjectId productId = new ObjectId(entaty.getProductId());
-            document.append("productId", productId);
+            document.append("productId", new ObjectId(entaty.getProductId()));
         } catch (IllegalArgumentException e) {
-            logger.error("Invalid productId format: {}", e);
+
+            ObjectId _ObjectId = new ObjectId();
+            String oldId = entaty.getProductId();
+            entaty.setProductId(_ObjectId.toHexString());
+            document.append("_id", _ObjectId);
+
+            logger.error("Invalid product Id format: {}, generating a new random ID : {}",
+                    oldId, entaty.getProductId(), e);
         }
 
         return document
@@ -48,7 +53,7 @@ public class OrderItemMapper implements DocumentMapper<OrderItem> {
                     .productId(document.getObjectId("productId").toHexString())
                     .quantity(document.getDouble("quantity"))
                     .price(document.getDouble("price"));
-        } catch (ClassCastException e) {
+        } catch (ClassCastException | NullPointerException e) {
             logger.error("Error casting.", e);
         }
         return orderItemBuilder.build();
