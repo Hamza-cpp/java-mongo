@@ -20,8 +20,8 @@ public class App {
     public static void main(String[] args) {
 
         final YamlConfig appConfig = new YamlConfig();
-        final String DB_NAME = appConfig.getString("mongodb.name");
-        final String DB_URI = appConfig.getString("mongodb.uri");
+        final String DB_NAME = appConfig.get("mongodb.name", String.class);
+        final String DB_URI = appConfig.get("mongodb.uri",String.class);
 
         try (MongoConfig mongoConfig = new MongoConfig(DB_URI)) {
             MongoDatabase database = mongoConfig.getMongoClient().getDatabase(DB_NAME);

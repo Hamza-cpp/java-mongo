@@ -18,7 +18,7 @@ public class YamlConfig {
     }
 
     // Get a configuration string using a path, e.g., "mongodb.uri"
-    public String getString(String path) {
+    public <T> T get(String path, Class<T> type) {
         String[] keys = path.split("\\.");
         Map<String, Object> current = config;
 
@@ -26,10 +26,17 @@ public class YamlConfig {
             for (int i = 0; i < keys.length - 1; i++) {
                 current = (Map<String, Object>) current.get(keys[i]);
             }
-
-            return (String) current.get(keys[keys.length - 1]);
+            return type.cast(current.get(keys[keys.length - 1]));
         } catch (ClassCastException e) {
-            throw new RuntimeException("Configuration path is incorrect or not a string", e);
+            throw new RuntimeException("Unable to retrieve configuration at path: " + path, e);
+        }
+    }
+
+    public <T> T getOrDefault(String path, Class<T> type, T defaultValue) {
+        try {
+            return get(path, type);
+        } catch (RuntimeException e) {
+            return defaultValue;
         }
     }
 }
